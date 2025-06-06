@@ -1,9 +1,0 @@
-{
-	"name": "ceelos-vehicle-tweaks",
-	"version": "1.2.0",
-	"title": "Ceelo's Vehicle Tweaks",
-	"author": "Ceeloman",
-	"factorio_version": "2.0",
-	"dependencies": ["base >= 2.0", "? spiderbots", "? Hovercrafts", "? aai-vehicles-miner"],
-	"description": "Mod that tweaks vehicles for better compatibility with my mods"
-  }

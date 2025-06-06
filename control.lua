@@ -69,3 +69,19 @@ script.on_event(defines.events.on_built_entity, function(event)
     end
   end
 end)
+
+script.on_init(function()
+    if remote.interfaces["ctron"] and remote.interfaces["ctron"]["add-ctron-names"] then
+        remote.call("ctron", "add-ctron-names", "Constructbot")
+        --game.print("Registered Constructbot with Constructron-Continued")
+    else
+        --game.print("Constructron-Continued interface not found")
+    end
+end)
+
+script.on_configuration_changed(function()
+    if remote.interfaces["ctron"] and remote.interfaces["ctron"]["add-ctron-names"] then
+        remote.call("ctron", "add-ctron-names", "Constructbot")
+        --game.print("Re-registered Constructbot with Constructron-Continued")
+    end
+end)

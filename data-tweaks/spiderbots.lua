@@ -20,7 +20,7 @@ local spiderbot_mk2_equipment_grid = {
       leg_scale = 0.9,
       name = "spiderbot-mk2",
       leg_thickness = 1.5,
-      leg_movement_speed = 1.8,
+      leg_movement_speed = 2.1,
   }
   
   -- Check if spiderbots mod is installed and create_spidertron function exists
@@ -36,18 +36,19 @@ local spiderbot_mk2_equipment_grid = {
           -- Set basic properties
           spiderbot_mk2_prototype.minable.result = "spiderbot-mk2"
           spiderbot_mk2_prototype.placeable_by = { item = "spiderbot-mk2", count = 1 }
-          spiderbot_mk2_prototype.guns = nil
+          --spiderbot_mk2_prototype.guns = nil
           spiderbot_mk2_prototype.inventory_size = 10  -- Add inventory
           spiderbot_mk2_prototype.trash_inventory_size = 5
           spiderbot_mk2_prototype.equipment_grid = "spiderbot-mk2-equipment-grid"  -- Add equipment grid
           spiderbot_mk2_prototype.allow_passengers = false
           spiderbot_mk2_prototype.is_military_target = false
           spiderbot_mk2_prototype.se_allow_in_space = true  -- Space Exploration compatibility
+          spiderbot_mk2_prototype.guns = {"spiderdrone-machine-gun-1"}
           
           -- Speed and movement adjustments
           spiderbot_mk2_prototype.torso_rotation_speed = spiderbot_mk2_prototype.torso_rotation_speed * 1.5
           spiderbot_mk2_prototype.torso_bob_speed = 0.5
-          spiderbot_mk2_prototype.chunk_exploration_radius = 2
+          spiderbot_mk2_prototype.chunk_exploration_radius = 3
           spiderbot_mk2_prototype.minable.mining_time = 0.5
             
           -- Adjust the legs to match the original mod's configuration
@@ -148,3 +149,126 @@ local spiderbot_mk2_equipment_grid = {
           }
       end
   end
+
+-- Create Constructbot, identical to spiderbot-mk2 except for name and recipe
+local constructbot_arguments = {
+    scale = 0.3,
+    leg_scale = 0.9,
+    name = "Constructbot",
+    leg_thickness = 1.5,
+    leg_movement_speed = 2.1,
+}
+
+if mods["spiderbots"] and _G.create_spidertron then
+    create_spidertron(constructbot_arguments)
+
+    local constructbot_prototype = data.raw["spider-vehicle"]["Constructbot"]
+    if constructbot_prototype then
+        -- Copy spiderbot-mk2 properties exactly
+        constructbot_prototype.minable = { mining_time = 0.5, result = "Constructbot" }
+        constructbot_prototype.placeable_by = { item = "Constructbot", count = 1 }
+        constructbot_prototype.inventory_size = 10
+        constructbot_prototype.trash_inventory_size = 5
+        constructbot_prototype.equipment_grid = "spiderbot-mk2-equipment-grid"
+        constructbot_prototype.allow_passengers = false
+        constructbot_prototype.is_military_target = false
+        constructbot_prototype.se_allow_in_space = true
+        constructbot_prototype.guns = {"spiderdrone-machine-gun-1"}
+        constructbot_prototype.torso_rotation_speed = constructbot_prototype.torso_rotation_speed * 1.5
+        constructbot_prototype.torso_bob_speed = 0.5
+        constructbot_prototype.chunk_exploration_radius = 3
+
+        -- Copy leg properties
+        local legs = constructbot_prototype.spider_engine.legs
+        if legs[1] then
+            for _, leg in pairs(legs) do
+                local leg_name = leg.leg
+                local leg_prototype = data.raw["spider-leg"][leg_name]
+                if leg_prototype then
+                    leg_prototype.localised_name = { "entity-name.Constructbot-leg" }
+                    leg_prototype.walking_sound_volume_modifier = 0.2
+                    leg_prototype.collision_mask = {
+                        layers = {
+                            water_tile = true,
+                            rail = true,
+                            ghost = true,
+                            object = true,
+                            empty_space = true,
+                            lava_tile = true,
+                            rail_support = true,
+                            cliff = true,
+                            spiderbot_leg = true,
+                        },
+                        not_colliding_with_itself = true,
+                        consider_tile_transitions = false,
+                        colliding_with_tiles_only = false,
+                    }
+                end
+            end
+        end
+
+        -- Create item
+        local spidertron_item = data.raw["item-with-entity-data"]["spidertron"]
+        local constructbot_item = {
+            type = "item-with-entity-data",
+            name = "Constructbot",
+            icon = spidertron_item.icon,
+            icon_size = spidertron_item.icon_size,
+            icon_mipmaps = 4,
+            stack_size = 10,
+            subgroup = "logistic-network",
+            order = "a[robot]-d[Constructbot]",
+            place_result = "Constructbot",
+        }
+
+        -- Create recipe
+        local constructbot_recipe = {
+            type = "recipe",
+            name = "Constructbot",
+            enabled = false,
+            energy_required = 10,
+            ingredients = {
+                { type = "item", name = "spiderbot-mk2", amount = 1 },
+            },
+            results = {
+                { type = "item", name = "Constructbot", amount = 1 },
+            },
+        }
+
+        -- Unlock recipe in spiderbots technology
+        if data.raw.technology["spiderbots"] then
+            table.insert(data.raw.technology["spiderbots"].effects, {
+                type = "unlock-recipe",
+                recipe = "Constructbot",
+            })
+        end
+
+        data:extend{
+            constructbot_prototype,
+            constructbot_item,
+            constructbot_recipe,
+        }
+    end
+end
+
+-- Remove constructron_service_station from spidertron technology
+if data.raw.technology["spidertron"] then
+    for i, effect in pairs(data.raw.technology["spidertron"].effects or {}) do
+        if effect.type == "unlock-recipe" and effect.recipe == "service_station" then
+            table.remove(data.raw.technology["spidertron"].effects, i)
+            break
+        end
+    end
+end
+
+-- Add constructron_service_station to construction-robotics and logistic-robotics
+local tech_prerequisites = { "construction-robotics", "logistic-robotics" }
+for _, tech_name in pairs(tech_prerequisites) do
+    if data.raw.technology[tech_name] then
+        data.raw.technology[tech_name].effects = data.raw.technology[tech_name].effects or {}
+        table.insert(data.raw.technology[tech_name].effects, {
+            type = "unlock-recipe",
+            recipe = "service_station",
+        })
+    end
+end
