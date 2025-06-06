@@ -167,13 +167,13 @@ if mods["spiderbots"] and _G.create_spidertron then
         -- Copy spiderbot-mk2 properties exactly
         constructbot_prototype.minable = { mining_time = 0.5, result = "Constructbot" }
         constructbot_prototype.placeable_by = { item = "Constructbot", count = 1 }
-        constructbot_prototype.inventory_size = 10
-        constructbot_prototype.trash_inventory_size = 5
+        constructbot_prototype.inventory_size = 16
+        constructbot_prototype.trash_inventory_size = 10
         constructbot_prototype.equipment_grid = "spiderbot-mk2-equipment-grid"
         constructbot_prototype.allow_passengers = false
         constructbot_prototype.is_military_target = false
         constructbot_prototype.se_allow_in_space = true
-        constructbot_prototype.guns = {"spiderdrone-machine-gun-1"}
+        --constructbot_prototype.guns = {"spiderdrone-machine-gun-1"}
         constructbot_prototype.torso_rotation_speed = constructbot_prototype.torso_rotation_speed * 1.5
         constructbot_prototype.torso_bob_speed = 0.5
         constructbot_prototype.chunk_exploration_radius = 3
